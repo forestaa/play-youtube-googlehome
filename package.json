@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "google-home-notifier": "^1.2.0"
+    "google-home-notifier": "^1.2.0",
+    "ytdl-core": "^0.28.3"
   }
 }
