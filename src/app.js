@@ -13,7 +13,7 @@ app.get("/", function(req, res, next){
 
 const googlehome = require('./googlehome');
 app.post("/music", function(req, res) {
-  console.log('test');
+  console.log('post');
   try {
     googlehome.playMusic(req.body.url);
     res.render("index", {});
