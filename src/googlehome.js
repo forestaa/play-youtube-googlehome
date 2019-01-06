@@ -27,14 +27,14 @@ setTimeout(function() {
 
 const ytdl = require('ytdl-core');
 exports.playMusic = function(url) {
-  console.log(`ipaddress = ${deviceAddress}`);
+  console.log(`ipaddress = ${deviceAddress}`); // TODO: check whether the address is valid
   ytdl.getInfo(url, (err, info) => {
-    if (err) throw err;
+    if (err) throw err; // TODO: report appropriate error 
     let audioFormat = ytdl.filterFormats(info.formats, 'audioonly');
-    if (audioFormat.length > 0) {
+    if (audioFormat.length > 0) { // TODO: report no audio error
       let url = audioFormat.pop().url;
       googlehome.play(url, res => {
-        console.log(res);
+        console.log(res); // TODO: report appropriate error
       });
     }
   }); 

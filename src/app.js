@@ -16,10 +16,10 @@ app.post("/music", function(req, res) {
   console.log('post');
   try {
     googlehome.playMusic(req.body.url);
-    res.render("index", {});
+    res.render("index", {}); // TODO: return appropriate html
   } catch (err) {
     console.log('error');
     console.log(err);
-    res.render("index", {});
+    res.render("index", {});  // TODO: return appropriate html
   }
 });
