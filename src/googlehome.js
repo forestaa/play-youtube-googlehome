@@ -26,7 +26,7 @@ setTimeout(function() {
 
 
 const ytdl = require('ytdl-core');
-exports.playMusic = function(url) {
+export function playMusic(url) {
   console.log(`ipaddress = ${deviceAddress}`); // TODO: check whether the address is valid
   ytdl.getInfo(url, (err, info) => {
     if (err) throw err; // TODO: report appropriate error 

@@ -5,13 +5,11 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "chrome",
+      "type": "node",
       "request": "launch",
-      "name": "Launch Chrome against localhost",
-      "url": "http://localhost:8080/index.html",
-      "webRoot": "${workspaceFolder}",
-      "runtimeExecutable": "/usr/bin/google-chrome-stable",
-      "userDataDir": true
+      "name": "Launch server",
+      "program": "${workspaceFolder}/out/app.js",
+      "preLaunchTask": "npm: compile"
     }
   ]
 }
