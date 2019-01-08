@@ -18,10 +18,13 @@ func main() {
 
 	ctx := context.Background()
 	devices := homecast.LookupAndConnect(ctx)
+	if len(devices) <= 0 {
+		log.Fatal("[Fatal] Failed to find GoogleHome in this LAN")
+	}
+	device := devices[0]
+
 	defer func() {
-		for _, device := range devices {
-			device.Close()
-		}
+		device.Close()
 	}()
 
 	http.Handle("/", http.FileServer(http.Dir("views")))
@@ -29,8 +32,13 @@ func main() {
 		log.Print("[INFO] access to /music")
 
 		r.ParseForm()
+		urls := r.PostForm["url"]
+		if len(urls) <= 0 {
+			log.Print("[Error] Failed to read url property: Body of Post doesn't contain URL of Music")
+			return
+		}
 
-		out, err := exec.Command("youtube-dl", "-x", "-g", r.PostForm["url"][0]).Output()
+		out, err := exec.Command("youtube-dl", "-x", "-g", urls[0]).Output()
 		if err != nil {
 			log.Printf("[ERROR] Failed to exec youtube-dl: %v", err)
 			return
@@ -42,27 +50,14 @@ func main() {
 			return
 		}
 
-		for _, device := range devices {
-			if err := device.Play(ctx, url); err != nil {
-				log.Printf("[ERROR] Failed to play: %v", err)
-			}
+		if err := device.Play(ctx, url); err != nil {
+			log.Printf("[ERROR] Failed to play: %v", err)
 		}
-
 	})
 
+	log.Print("[INFO] start http server")
 	addr := fmt.Sprintf(":%d", *port)
 	if err := http.ListenAndServe(addr, nil); err != nil {
-		log.Fatal("ListenAndServe: ", err)
+		log.Fatal("[FATAL] ListenAndServe: ", err)
 	}
-}
-
-func handlePost(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "query: %s\n", r.URL.RawQuery)
-
-	r.ParseForm()
-	form := r.PostForm
-	fmt.Fprintf(w, "form: \n%v\n", form)
-
-	params := r.Form
-	fmt.Fprintf(w, "parameter: \n%v\n", params)
 }

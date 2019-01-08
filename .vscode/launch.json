@@ -7,9 +7,17 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch server",
+      "name": "Launch Node server",
       "program": "${workspaceFolder}/out/app.js",
       "preLaunchTask": "npm: compile"
+    },
+    {
+      "type": "go",
+      "request": "launch",
+      "name": "Launch Go server",
+      "program": "${workspaceFolder}/src/go/server.go",
+      "cwd": "${workspaceFolder}",
+      "postDebugTask": "go clean"
     }
   ]
 }

@@ -7,13 +7,13 @@
     ],
     "sourceMap": true,
     "outDir": "out",
-    "rootDir": "src",
+    "rootDir": "src/typescript",
     "strict": true,
     "noUnusedLocals": true,
     "allowJs": true
   },
   "include": [
-    "src"
+    "src/typescript"
   ],
   "exclude": [
     "node_modules"
