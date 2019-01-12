@@ -5,19 +5,19 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "node",
-      "request": "launch",
-      "name": "Launch Node server",
-      "program": "${workspaceFolder}/out/app.js",
-      "preLaunchTask": "npm: compile"
-    },
-    {
       "type": "go",
       "request": "launch",
       "name": "Launch Go server",
       "program": "${workspaceFolder}/src/go/server.go",
       "cwd": "${workspaceFolder}",
       "postDebugTask": "go clean"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Node server",
+      "program": "${workspaceFolder}/out/app.js",
+      "preLaunchTask": "npm: compile"
     }
   ]
 }

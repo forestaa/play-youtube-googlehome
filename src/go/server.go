@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"net/url"
 	"os/exec"
+	"strings"
+	"text/template"
 
 	"github.com/ikasamah/homecast"
 )
@@ -38,13 +40,21 @@ func main() {
 			return
 		}
 
-		out, err := exec.Command("youtube-dl", "-x", "-g", urls[0]).Output()
+		out, err := exec.Command("youtube-dl", "--get-title", "-x", "-g", "--get-thumbnail", urls[0]).Output()
 		if err != nil {
 			log.Printf("[ERROR] Failed to exec youtube-dl: %v", err)
 			return
 		}
 
-		url, err := url.Parse(string(out))
+		lines := strings.Split(string(out), "\n")
+		page := page{
+			URL:          urls[0],
+			AudioURL:     lines[1],
+			Title:        lines[0],
+			ThumbnailURL: lines[2],
+		}
+
+		url, err := url.Parse(page.AudioURL)
 		if err != nil {
 			log.Printf("[ERROR] Failed to parse url: %v", err)
 			return
@@ -53,6 +63,13 @@ func main() {
 		if err := device.Play(ctx, url); err != nil {
 			log.Printf("[ERROR] Failed to play: %v", err)
 		}
+
+		t, err := template.ParseFiles("./views/template.html")
+		if err != nil {
+			log.Printf("[ERROR] Failed to load template file: %v", err)
+			return
+		}
+		t.Execute(w, page)
 	})
 
 	log.Print("[INFO] start http server")
@@ -60,4 +77,11 @@ func main() {
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Fatal("[FATAL] ListenAndServe: ", err)
 	}
+}
+
+type page struct {
+	URL          string
+	AudioURL     string
+	Title        string
+	ThumbnailURL string
 }
