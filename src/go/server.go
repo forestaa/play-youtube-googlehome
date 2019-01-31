@@ -34,33 +34,32 @@ func main() {
 		log.Print("[INFO] access to /music")
 
 		r.ParseForm()
-		urls := r.PostForm["url"]
-		if len(urls) <= 0 {
+		urlbody := r.PostForm["url"]
+		if len(urlbody) <= 0 {
 			log.Print("[Error] Failed to read url property: Body of Post doesn't contain URL of Music")
 			return
 		}
 
-		out, err := exec.Command("youtube-dl", "--get-title", "-x", "-g", "--get-thumbnail", urls[0]).Output()
+		infos, err := getInfo(urlbody[0])
 		if err != nil {
-			log.Printf("[ERROR] Failed to exec youtube-dl: %v", err)
+			log.Printf("[ERROR] Failed to get music infos: %v", err)
 			return
 		}
 
-		lines := strings.Split(string(out), "\n")
-		page := page{
-			URL:          urls[0],
-			AudioURL:     lines[1],
-			Title:        lines[0],
-			ThumbnailURL: lines[2],
+		medias := make([]homecast.MediaData, len(infos))
+		for i, info := range infos {
+			url, err := url.Parse(info.AudioURL)
+			if err != nil {
+				log.Printf("[ERROR] Failed to parse url: %v", err)
+				return
+			}
+			medias[i] = homecast.MediaData{
+				URL:   url,
+				Title: info.Title,
+			}
 		}
 
-		url, err := url.Parse(page.AudioURL)
-		if err != nil {
-			log.Printf("[ERROR] Failed to parse url: %v", err)
-			return
-		}
-
-		if err := device.Play(ctx, url); err != nil {
+		if err := device.QueueLoad(ctx, medias); err != nil {
 			log.Printf("[ERROR] Failed to play: %v", err)
 		}
 
@@ -69,7 +68,7 @@ func main() {
 			log.Printf("[ERROR] Failed to load template file: %v", err)
 			return
 		}
-		t.Execute(w, page)
+		t.Execute(w, infos[0])
 	})
 
 	log.Print("[INFO] start http server")
@@ -79,9 +78,29 @@ func main() {
 	}
 }
 
-type page struct {
+type MusicInfo struct {
 	URL          string
 	AudioURL     string
 	Title        string
 	ThumbnailURL string
+}
+
+func getInfo(url string) ([]MusicInfo, error) {
+	out, err := exec.Command("youtube-dl", "--get-title", "-x", "-g", "--get-thumbnail", url).Output()
+	if err != nil {
+		return nil, fmt.Errorf("Failed to exec youtube-dl: %v", err)
+	}
+
+	lines := strings.Split(string(out), "\n")
+	musics := make([]MusicInfo, len(lines)/3)
+	for i := 0; i < len(lines)/3; i++ {
+		musics[i] = MusicInfo{
+			URL:          url,
+			AudioURL:     lines[3*i+1],
+			Title:        lines[3*i+0],
+			ThumbnailURL: lines[3*i+2],
+		}
+	}
+
+	return musics, nil
 }
