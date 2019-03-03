@@ -1,15 +1,15 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"flag"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"net/url"
 	"os/exec"
-	"strings"
-	"text/template"
 
 	"github.com/ikasamah/homecast"
 )
@@ -40,27 +40,65 @@ func main() {
 			return
 		}
 
-		infos, err := getInfo(urlbody[0])
+		cmd := exec.Command("youtube-dl", "--get-title", "-x", "-g", "--get-thumbnail", urlbody[0])
+		outReader, err := cmd.StdoutPipe()
 		if err != nil {
-			log.Printf("[ERROR] Failed to get music infos: %v", err)
-			return
+			log.Printf("Failed to exec youtube-dl: %v", err)
 		}
 
-		medias := make([]homecast.MediaData, len(infos))
-		for i, info := range infos {
-			url, err := url.Parse(info.AudioURL)
-			if err != nil {
-				log.Printf("[ERROR] Failed to parse url: %v", err)
-				return
-			}
-			medias[i] = homecast.MediaData{
-				URL:   url,
-				Title: info.Title,
-			}
-		}
+		infoChan := make(chan MusicInfo)
+		scanner := bufio.NewScanner(outReader)
+		go func() {
+			info := MusicInfo{URL: urlbody[0]}
+			nItem := 0
+			nFields := 0
+			for scanner.Scan() {
+				switch nFields % 3 {
+				case 0:
+					info.Title = scanner.Text()
+				case 1:
+					info.AudioURL = scanner.Text()
+				default:
+					info.ThumbnailURL = scanner.Text()
+					infoChan <- info
+					log.Printf("[Info] nItem: %v, info: %v", nItem, info)
 
-		if err := device.QueueLoad(ctx, medias); err != nil {
-			log.Printf("[ERROR] Failed to play: %v", err)
+					url, err := url.Parse(info.AudioURL)
+					if err != nil {
+						log.Printf("[ERROR] Failed to parse url: %v", err)
+						return
+					}
+
+					media := homecast.MediaData{
+						URL:   url,
+						Title: info.Title,
+					}
+					medias := []homecast.MediaData{media}
+
+					switch nItem {
+					case 0:
+						if err := device.QueueLoad(ctx, medias); err != nil {
+							log.Printf("[ERROR] Failed to play: %v", err)
+						}
+					default:
+						if err := device.QueueInsert(ctx, medias); err != nil {
+							log.Printf("[ERROR] Failed to play: %v", err)
+						}
+					}
+					nItem++
+					info = MusicInfo{URL: urlbody[0]}
+				}
+				nFields++
+			}
+			close(infoChan)
+		}()
+		cmd.Start()
+
+		infos := make([]MusicInfo, 25)
+		i := 0
+		for info := range infoChan {
+			infos[i] = info
+			i++
 		}
 
 		t, err := template.ParseFiles("./views/template.html")
@@ -83,24 +121,4 @@ type MusicInfo struct {
 	AudioURL     string
 	Title        string
 	ThumbnailURL string
-}
-
-func getInfo(url string) ([]MusicInfo, error) {
-	out, err := exec.Command("youtube-dl", "--get-title", "-x", "-g", "--get-thumbnail", url).Output()
-	if err != nil {
-		return nil, fmt.Errorf("Failed to exec youtube-dl: %v", err)
-	}
-
-	lines := strings.Split(string(out), "\n")
-	musics := make([]MusicInfo, len(lines)/3)
-	for i := 0; i < len(lines)/3; i++ {
-		musics[i] = MusicInfo{
-			URL:          url,
-			AudioURL:     lines[3*i+1],
-			Title:        lines[3*i+0],
-			ThumbnailURL: lines[3*i+2],
-		}
-	}
-
-	return musics, nil
 }
