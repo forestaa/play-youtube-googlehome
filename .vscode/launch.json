@@ -18,6 +18,17 @@
       "name": "Launch Node server",
       "program": "${workspaceFolder}/out/app.js",
       "preLaunchTask": "npm: compile"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch via NPM",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run-script",
+        "start"
+      ],
+      "useWSL": true
     }
   ]
 }

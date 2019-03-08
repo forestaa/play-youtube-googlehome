@@ -6,6 +6,8 @@ github.com/forestaa/homecast v0.0.0-20190303140315-c7cf39f4cf00 h1:TBnBLffuf9NjN
 github.com/forestaa/homecast v0.0.0-20190303140315-c7cf39f4cf00/go.mod h1:58Kx9NOKZbx2xD/TOBwTq/8YGoHCbHI14fJs47wSK58=
 github.com/gogo/protobuf v1.2.1 h1:/s5zKNz0uPFCZ5hddgPdo2TK2TVrUNMn0OOX8/aZMTE=
 github.com/gogo/protobuf v1.2.1/go.mod h1:hp+jE20tsWTFYpLwKvXlhS1hjn+gTNwPg2I6zVXpSg4=
+github.com/gorilla/websocket v1.4.0 h1:WDFjx/TMzVgy9VdMMQi2K2Emtwi2QcUQsztZ/zLaH/Q=
+github.com/gorilla/websocket v1.4.0/go.mod h1:E7qHFY5m1UJ88s3WnNqhKjPHQ0heANvMoAMk2YaljkQ=
 github.com/ikasamah/homecast v0.0.0-20181120095505-ae646e87e54e h1:/Cto2qoXuxRhmINj6ppLBUIr2OOOPlVGoYPnkhWYpHY=
 github.com/ikasamah/homecast v0.0.0-20181120095505-ae646e87e54e/go.mod h1:PfB8UByHnspx57IUomrWQawuOXs1+G4dJ84mrrpqNF0=
 github.com/kisielk/errcheck v1.1.0/go.mod h1:EZBBE59ingxPouuu3KfxchcWSUPOHkagtvWXihfKN4Q=

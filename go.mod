@@ -3,6 +3,7 @@ module github.com/forestaa/play-youtube-googlehome
 require (
 	github.com/barnybug/go-cast v0.0.0-20181026143840-5be61902f818 // indirect
 	github.com/gogo/protobuf v1.2.1 // indirect
+	github.com/gorilla/websocket v1.4.0
 	github.com/ikasamah/homecast v0.0.0-20181120095505-ae646e87e54e
 	github.com/micro/mdns v0.1.0 // indirect
 )
